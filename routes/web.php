@@ -35,8 +35,9 @@ Route::get('/', function () {
 })->name('login');
 
 Route::post('/login-pin', [LoginController::class, 'loginConPin'])->name('login.pin');
-Auth::routes();
 
+// Desactivamos la ruta de login interna de Auth para evitar el conflicto
+Auth::routes(['login' => false]);
 // ==========================================
 // --- RUTAS PÚBLICAS (SIN AUTENTICACIÓN) ---
 // ==========================================
