@@ -28,7 +28,7 @@
         body.modo-crema #sidebar { background: rgba(255, 255, 255, 0.96); border-color: rgba(15, 23, 42, 0.08); box-shadow: 0 30px 70px rgba(15, 23, 42, 0.08); }
         body.modo-crema #sidebar .logo-wrapper { color: #111827; }
         body.modo-crema #sidebar .logo-wrapper .sidebar-text span:first-child { color: #111827; }
-        body.modo-crema #sidebar .logo-wrapper .sidebar-text span:last-child { color: #6b7280; }
+        body.modo-crema #sidebar .logo-wrapper .sidebar-text span:last-child { color: #dc2626 !important; } /* Mantenemos el rojo en modo claro */
         body.modo-crema #sidebar .menu-link { border-color: rgba(15, 23, 42, 0.08); }
         body.modo-crema #sidebar .menu-link:hover { background: rgba(15, 23, 42, 0.04); }
         body.modo-crema #sidebar .menu-link .sidebar-text { color: #4b5563; }
@@ -80,34 +80,39 @@
     {{-- Script en línea para aplicar el estado ANTES de que renderice la página (evita parpadeo) --}}
     <script>
         (function() {
-            // El estado "colapsado" (ancho 88px) solo debe recordarse/aplicarse en desktop.
-            // En móvil el sidebar siempre arranca oculto (drawer cerrado).
             if (window.matchMedia('(min-width: 1024px)').matches && localStorage.getItem('sidebarState') === 'collapsed') {
                 document.getElementById('sidebar').classList.add('colapsado');
             }
         })();
     </script>
 
-    {{-- Header del Logo --}}
+    {{-- Header del Logo ACTUALIZADO --}}
     <div class="h-24 flex items-center px-5 relative shrink-0 w-full transition-all">
-        <div class="absolute top-1/2 left-10 -translate-y-1/2 w-20 h-20 bg-blue-500/10 blur-[30px] rounded-full pointer-events-none"></div>
+        <!-- El resplandor trasero ahora es rojo para combinar con el logo -->
+        <div class="absolute top-1/2 left-10 -translate-y-1/2 w-20 h-20 bg-red-500/10 blur-[30px] rounded-full pointer-events-none"></div>
         
         <div class="logo-wrapper flex items-center relative z-10 w-full transition-opacity duration-300">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[1px] shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0">
-                <div class="w-full h-full bg-[var(--card-color)] rounded-[11px] flex items-center justify-center">
-                    <img src="{{ asset('images/mrlogo.png') }}" alt="Logo" class="w-6 h-6 object-contain">
-                </div>
+            
+            <!-- Logo circular con efecto de difuminado -->
+            <div class="w-12 h-12 shrink-0 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 overflow-hidden">
+                <img src="{{ asset('images/logo_casablanca.jpg') }}" 
+                     alt="CasaBlanca" 
+                     class="w-full h-full object-contain scale-110"
+                     style="-webkit-mask-image: radial-gradient(circle at center, black 55%, transparent 95%); mask-image: radial-gradient(circle at center, black 55%, transparent 95%);">
             </div>
-            <div class="sidebar-text ml-3 flex flex-col">
-                <span class="font-black tracking-[0.15em] text-[15px] text-[var(--text-color)] leading-none">
-                    Mr. Feg <span class="text-blue-500"></span>
+
+            <!-- Textos a dos líneas con control de desbordamiento (min-w-0 y truncate) -->
+            <div class="sidebar-text ml-3 flex flex-col min-w-0">
+                <span class="font-black tracking-wide text-[15px] text-[var(--text-color)] leading-none truncate" title="CASABLANCA">
+                    CASABLANCA
                 </span>
-                <span class="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-[0.25em] mt-1.5">Sistema Ventas</span>
+                <span class="text-[9px] text-red-600 font-bold uppercase tracking-[0.2em] mt-1.5 truncate" title="RESTAURANTE">
+                    RESTAURANTE
+                </span>
             </div>
         </div>
         
         {{-- SE AGREGÓ top-7 AQUÍ PARA ALINEAR CON EL TÍTULO --}}
-        {{-- En desktop: colapsa/expande. En móvil: cierra el drawer. --}}
         <button id="toggleSidebar" class="absolute right-4 top-7 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--input-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-all cursor-pointer z-50 shrink-0">
             <i class="fas fa-bars text-sm"></i>
         </button>
@@ -199,7 +204,6 @@
 
         <form method="POST" action="{{ route('logout') }}" class="mt-1 w-full flex justify-center">
             @csrf
-            {{-- BOTÓN ACTUALIZADO PARA FORMAR EL CUADRADO PERFECTO CUANDO COLAPSA --}}
             <button type="submit" class="btn-logout w-full h-[44px] px-3 flex items-center bg-gradient-to-tr from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-2xl transition-all duration-300 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 active:scale-95 group overflow-hidden">
                 <div class="flex items-center justify-center shrink-0 w-6">
                     <i class="fas fa-sign-out-alt text-[15px] transition-transform group-hover:scale-110"></i>
@@ -210,11 +214,7 @@
     </div>
 </aside>
 
-{{-- Fondo oscuro detrás del drawer en móvil. Tocarlo lo cierra. --}}
 <div id="sidebarOverlay"></div>
-
-{{-- Nota: el botón de menú (#mobileMenuBtn) ahora vive dentro del header
-     en layouts/admin.blade.php, junto al botón de tema (sol/luna). --}}
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -249,22 +249,15 @@
             document.body.style.overflow = '';
         }
 
-        // 2. Botón flotante: abre el drawer en móvil
         mobileMenuBtn?.addEventListener('click', abrirDrawerMovil);
-
-        // 3. Tocar el fondo oscuro cierra el drawer
         overlay?.addEventListener('click', cerrarDrawerMovil);
 
-        // 4. Elegir una ruta del menú cierra el drawer automáticamente en móvil
         document.querySelectorAll('#nav-container .menu-link').forEach(link => {
             link.addEventListener('click', () => {
                 if (esMovil()) cerrarDrawerMovil();
             });
         });
 
-        // 5. Click en el botón de hamburguesa (dentro del sidebar)
-        //    - En desktop: colapsa/expande (comportamiento original).
-        //    - En móvil: cierra el drawer.
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 if (esMovil()) {
@@ -281,8 +274,6 @@
             });
         }
 
-        // 6. Si el usuario rota el dispositivo o cambia de tamaño de ventana
-        //    y cruza el breakpoint, aseguramos un estado limpio.
         window.addEventListener('resize', () => {
             if (!esMovil()) {
                 cerrarDrawerMovil();

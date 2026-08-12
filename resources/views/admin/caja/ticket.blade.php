@@ -39,7 +39,7 @@
         th, td { text-align: left; vertical-align: top; padding: 3px 0; }
         th { border-bottom: 1px dashed #000; font-weight: bold; padding-bottom: 3px; font-size: 13px;}
         
-        /* Estilos de productos (Letra grande y gruesa de Pizzetos) */
+        /* Estilos de productos */
         .item-principal { font-size: 16px; font-weight: 900; line-height: 1.2; }
         .sub-item { font-size: 13px; font-weight: bold; color: #333; line-height: 1.2; }
         .precio-text { font-size: 15px; font-weight: bold; }
@@ -61,11 +61,11 @@
 </head>
 <body>
 
-    <!-- Encabezado (Estilo Pizzetos) -->
+    <!-- Encabezado -->
     <div class="text-center mb-1">
         
-        <!-- Logo de El Agostadero -->
-        <img src="{{ asset('images/agostadero.png') }}" alt="El Agostadero" class="ticket-logo">
+        <!-- Logo de CasaBlanca RamenHouse -->
+        <img src="{{ asset('images/logo_casablanca.jpg') }}" alt="CasaBlanca RamenHouse" class="ticket-logo">
         
         <div style="font-size: 12px; margin-top: 4px;">TICKET</div>
 
@@ -131,7 +131,7 @@
 
     <div class="dashed-line"></div>
 
-    <!-- Totales (Alineados con flex-between estilo Pizzetos) -->
+    <!-- Totales -->
     <div style="padding: 5px 0;">
         <div class="flex-between" style="font-size: 14px; margin-bottom: 3px;">
             <span>SUBTOTAL:</span>
@@ -210,12 +210,12 @@
         ¡GRACIAS POR SU COMPRA!
     </div>
 
-    <!-- Leyenda promocional del software -->
+    <!-- Leyenda promocional del software actualizada -->
     <div class="dashed-line" style="margin-top: 15px;"></div>
     <div class="text-center" style="margin-top: 8px; font-size: 12px; line-height: 1.4;">
         <span class="font-bold">¿NECESITAS UN SOFTWARE PARA TU NEGOCIO?</span><br>
         <span class="font-bold">¡CONTÁCTANOS!</span><br>
-        WWW.OLLINTEM.COM.MX
+        OLLINSOFT | RTV SYSTEMS & SOFTWARE
     </div>
 
     <!-- Botón de respaldo (Se oculta al imprimir) -->
@@ -226,7 +226,7 @@
     </div>
 
     <script>
-        // JS original de Agostadero mantenido intencionalmente
+        // JS original mantenido intencionalmente
         // El modal que lo muestra dispara la impresión. 
         // No auto-imprimir ni auto-cerrar.
     </script>
