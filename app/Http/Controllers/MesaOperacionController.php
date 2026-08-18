@@ -275,9 +275,14 @@ class MesaOperacionController extends Controller
                         'caja_movimiento_id' => $cajaActiva->id,
                     ]);
 
-                    // Solo se libera la mesa cuando TODAS las partes están pagadas.
                     if (!$mesa->cuentasDivisionPendientes()->exists()) {
                         $this->cajaService->liberarMesa($mesa);
+                        
+                        // LIMPIEZA AUTOMÁTICA DE MESAS WEB TEMPORALES
+                        if ($mesa->seccion === 'WEB' && $mesa->id != 1) {
+                            $mesa->delete();
+                        }
+                        
                         return ['mesaLiberada' => true];
                     }
 
@@ -285,6 +290,12 @@ class MesaOperacionController extends Controller
                 }
 
                 $this->cajaService->liberarMesa($mesa);
+                
+                // LIMPIEZA AUTOMÁTICA DE MESAS WEB TEMPORALES (Pago Normal)
+                if ($mesa->seccion === 'WEB' && $mesa->id != 1) {
+                    $mesa->delete();
+                }
+
                 return ['mesaLiberada' => true];
             });
 
@@ -553,9 +564,14 @@ class MesaOperacionController extends Controller
 
                 // Si la mesa tenía la cuenta dividida, esas partes ya no
                 // aplican: se van con la cuenta cancelada.
-                $mesa->cuentasDivision()->delete();
+              $mesa->cuentasDivision()->delete();
 
                 $this->cajaService->liberarMesa($mesa);
+
+                // LIMPIEZA AUTOMÁTICA AL CANCELAR
+                if ($mesa->seccion === 'WEB' && $mesa->id != 1) {
+                    $mesa->delete();
+                }
 
                 return [
                     'numero' => $mesa->numero,

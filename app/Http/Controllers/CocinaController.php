@@ -176,20 +176,24 @@ public function actualizarEstado(Request $request, $id)
                     }
 
                     // No mostramos tarjetas ya servidas en el tablero activo
+                    // No mostramos tarjetas ya servidas en el tablero activo
                     if ($estadoTarjeta === 'servida') {
                         continue;
                     }
 
                     $comandasTodas->push((object) [
-                        'id'        => $orden->id . '-' . $lote . '-' . $area,
-                        'orden_id'  => $orden->id,
-                        'lote'      => $lote,
-                        'area'      => $area,
-                        'mesa'      => $orden->mesa,
-                        'mesero'    => $orden->mesero,
-                        'estado'    => $estadoTarjeta,
-                        'detalles'  => $detallesArea,
-                        'creado_en' => $detallesArea->min('created_at'),
+                        'id'             => $orden->id . '-' . $lote . '-' . $area,
+                        'orden_id'       => $orden->id,
+                        'lote'           => $lote,
+                        'area'           => $area,
+                        'mesa'           => $orden->mesa,
+                        'mesero'         => $orden->mesero,
+                        'estado'         => $estadoTarjeta,
+                        'detalles'       => $detallesArea,
+                        'creado_en'      => $detallesArea->min('created_at'),
+                        // NUEVAS COLUMNAS PARA LA WEB
+                        'origen'         => $orden->origen,
+                        'nombre_cliente' => $orden->nombre_cliente,
                     ]);
                 }
             }

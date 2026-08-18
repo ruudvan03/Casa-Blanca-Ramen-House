@@ -15,10 +15,18 @@ return new class extends Migration
             $table->id();
             $table->string('numero_orden')->unique();
             $table->foreignId('mesa_id')->nullable()->constrained('mesas')->onDelete('set null');
-            $table->foreignId('mesero_id')->constrained('users');
+            
+            // MODIFICADO: Ahora permite nulos (los pedidos web no tienen mesero)
+            $table->foreignId('mesero_id')->nullable()->constrained('users');
+            
             $table->foreignId('capitan_id')->nullable()->constrained('users');
             
             $table->string('estado'); // Ej: pendiente, en proceso, servida, pagada
+            
+            // --- NUEVOS CAMPOS WEB ---
+            $table->string('origen')->default('local'); // Para diferenciar 'local' de 'web'
+            $table->string('nombre_cliente')->nullable(); // Nombre de quien pide en la web
+            $table->string('telefono_cliente')->nullable(); // Teléfono de contacto
             
             // --- CAMPOS FINANCIEROS ---
             $table->decimal('total', 10, 2)->default(0);

@@ -106,6 +106,7 @@ class TicketService
                     'subtotal'         => $subtotalLinea,
                     'descuento'        => $descuento,
                     'promocion_nombre' => $detalle->promocionAplicada?->promocion?->nombre,
+                    'notas'            => $detalle->notas,
                 ];
             });
         });

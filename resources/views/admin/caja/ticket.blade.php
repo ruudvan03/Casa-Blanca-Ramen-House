@@ -106,11 +106,20 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($items as $item)
+           @foreach($items as $item)
                 <tr class="item-principal">
                     <td style="padding-top: 8px; padding-left: 2px;">{{ $item['cantidad'] }}X {{ $item['nombre'] }}</td>
                     <td class="text-right precio-text" style="padding-top: 8px;">${{ number_format($item['subtotal'], 2) }}</td>
                 </tr>
+
+                {{-- IMPRESIÓN DEL DESGLOSE / NOTAS DEL PEDIDO --}}
+                @if(!empty($item['notas']))
+                    <tr>
+                        <td colspan="2" style="font-size: 11px; padding-left: 10px; color: #444; padding-bottom: 4px; line-height: 1.3;">
+                            {!! nl2br(e(str_replace(' | ', "\n", $item['notas']))) !!}
+                        </td>
+                    </tr>
+                @endif
                 
                 @if(($item['descuento'] ?? 0) > 0)
                     <tr class="sub-item">

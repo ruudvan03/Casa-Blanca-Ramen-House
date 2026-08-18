@@ -21,6 +21,10 @@ class Orden extends Model
     // deja de aparecer en Caja y en la comanda automáticamente.
     const ESTADO_CANCELADA = 'cancelada';
 
+    // --- CONSTANTES DE ORIGEN (NUEVAS) ---
+    const ORIGEN_LOCAL = 'local';
+    const ORIGEN_WEB   = 'web';
+
     /**
      * Retorna los estados que se consideran "activos" o "en servicio".
      * Útil para consultas en el controlador.
@@ -42,6 +46,11 @@ class Orden extends Model
         'mesero_id',
         'capitan_id',
         'estado',
+        // --- NUEVOS CAMPOS WEB ---
+        'origen',           
+        'nombre_cliente',   
+        'telefono_cliente', 
+        // -------------------------
         'total',
         'propina',
         'metodo_pago',

@@ -1,6 +1,5 @@
 {{-- resources/views/admin/cocina/partials/comandas.blade.php --}}
 
-{{-- Estilos para las animaciones de parpadeo --}}
 <style>
     @keyframes parpadeoAmarillo {
         0%, 100% { border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
@@ -29,11 +28,9 @@
     <div class="grid gap-3 sm:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mt-4 sm:mt-8 items-start w-full">
         @foreach($comandas as $comanda)
             @php
-                // Parseo seguro de fecha
                 $fechaCarbon = !empty($comanda->creado_en) ? \Carbon\Carbon::parse($comanda->creado_en) : now();
                 $minutosEspera = $fechaCarbon->diffInMinutes(now());
 
-                // Determinamos la clase de parpadeo según los minutos
                 $claseAlerta = '';
                 if ($minutosEspera >= 15) {
                     $claseAlerta = 'alerta-roja';
@@ -41,16 +38,26 @@
                     $claseAlerta = 'alerta-amarilla';
                 }
 
-                // Formateo del número de mesa para evitar "Mesa mesa 45"
-                $numMesa = $comanda->mesa->numero ?? 'S/N';
-                $labelMesa = \Illuminate\Support\Str::startsWith(strtolower($numMesa), 'mesa') 
-                    ? $numMesa 
-                    : 'Mesa ' . $numMesa;
+                $origen = $comanda->origen ?? 'local'; 
+                $esWeb = ($origen === 'web');
 
-                // Delivery
+                if ($esWeb) {
+                    $nombre = $comanda->nombre_cliente ?? 'Pedido Web';
+                    $labelMesa = '🌐 ' . $nombre;
+                    $textoSubtitulo = 'Auto-pedido (App Web)';
+                } else {
+                    $numMesa = $comanda->mesa->numero ?? 'S/N';
+                    $labelMesa = \Illuminate\Support\Str::startsWith(strtolower($numMesa), 'mesa') 
+                        ? $numMesa 
+                        : 'Mesa ' . $numMesa;
+                    
+                    $nombreMesero = $comanda->mesero->name ?? $comanda->mesero->nombre ?? 'N/A';
+                    $textoSubtitulo = 'Mesero: ' . $nombreMesero;
+                }
+
                 $esDelivery  = $comanda->mesa && $comanda->mesa->esDelivery();
                 $plataforma  = $esDelivery ? optional($comanda->mesa->plataformaDelivery)->nombre : null;
-                $colorBorde  = $esDelivery ? 'border-t-orange-500' : 'border-t-emerald-500';
+                $colorBorde  = $esDelivery ? 'border-t-orange-500' : ($esWeb ? 'border-t-blue-500' : 'border-t-emerald-500');
             @endphp
 
             <article class="bg-[var(--card-color)] w-full rounded-[20px] border border-[var(--border-color)] border-t-[6px] {{ $colorBorde }} shadow-lg flex flex-col h-full overflow-hidden relative transition-all duration-300 comanda-card {{ $claseAlerta }}"
@@ -60,20 +67,23 @@
                 <div class="p-4 border-b border-[var(--border-color)] min-w-0 flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 mb-0.5">
-                            <h3 class="font-black text-lg truncate capitalize">{{ $labelMesa }}</h3>
-                            @if($esDelivery)
+                           <h3 class="font-black text-lg break-words capitalize leading-tight">{{ $labelMesa }}</h3>
+                           @if($esDelivery)
                                 <span class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500 text-white text-[9px] font-black uppercase tracking-wider shadow-sm">
                                     <i class="fas fa-motorcycle text-[8px]"></i>
                                     {{ $plataforma ?? 'Delivery' }}
                                 </span>
-                            @endif
+                           @endif
+                           @if($esWeb)
+                                <span class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500 text-white text-[9px] font-black uppercase tracking-wider shadow-sm">
+                                    <i class="fas fa-wifi text-[8px]"></i> WEB
+                                </span>
+                           @endif
                         </div>
-                        <p class="text-xs text-[var(--text-muted)] truncate">Mesero: {{ $comanda->mesero->nombre ?? 'N/A' }}</p>
+                        <p class="text-xs text-[var(--text-muted)] truncate">{{ $textoSubtitulo }}</p>
                     </div>
-                    <span
-                        class="tiempo-espera shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wide whitespace-nowrap bg-zinc-500/10 border-zinc-500/30 text-zinc-400"
-                        data-creado="{{ $fechaCarbon->toIso8601String() }}"
-                    >
+                    <span class="tiempo-espera shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wide whitespace-nowrap bg-zinc-500/10 border-zinc-500/30 text-zinc-400"
+                        data-creado="{{ $fechaCarbon->toIso8601String() }}">
                         <i class="fas fa-clock"></i>
                         <span class="tiempo-texto">--</span>
                     </span>
@@ -94,47 +104,54 @@
                            <li class="flex flex-col text-sm gap-1.5 detalle-item"
                                data-detalle-id="{{ $detalle->id }}"
                                data-estado="{{ $detalle->estado_preparacion }}">
-    <div class="flex items-center justify-between gap-2">
-        <span class="font-bold break-words flex flex-wrap items-center gap-1.5 nombre-producto transition-all
-              {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'line-through opacity-40 text-[var(--text-muted)]' : 'text-[var(--text-color)]' }}">
-        {{ $detalle->cantidad }}x {{ $detalle->producto->nombre ?? 'Producto Eliminado' }}
-        @if($tInfo)
-            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-md border {{ $tInfo['clase'] }}">
-                <i class="fas fa-clock"></i>Tiempo {{ $tInfo['label'] }}
-            </span>
-        @endif
-        @if($detalle->gramaje)
-            @php
-                $gramajeLimpio = rtrim(rtrim(number_format((float) $detalle->gramaje, 2, '.', ''), '0'), '.');
-            @endphp
-            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-orange-400 bg-orange-500/10 border border-orange-500/30 px-1.5 py-0.5 rounded-md">
-                <i class="fas fa-weight-hanging"></i>{{ $gramajeLimpio }}g
-            </span>
-        @endif
-        </span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-bold break-words flex flex-wrap items-center gap-1.5 nombre-producto transition-all
+                                         {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'line-through opacity-40 text-[var(--text-muted)]' : 'text-[var(--text-color)]' }}">
+                                    {{ $detalle->cantidad }}x {{ $detalle->producto->nombre ?? 'Producto Eliminado' }}
+                                    @if($tInfo)
+                                        <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-md border {{ $tInfo['clase'] }}">
+                                            <i class="fas fa-clock"></i>Tiempo {{ $tInfo['label'] }}
+                                        </span>
+                                    @endif
+                                    @if($detalle->gramaje)
+                                        @php
+                                            $gramajeLimpio = rtrim(rtrim(number_format((float) $detalle->gramaje, 2, '.', ''), '0'), '.');
+                                        @endphp
+                                        <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-orange-400 bg-orange-500/10 border border-orange-500/30 px-1.5 py-0.5 rounded-md">
+                                            <i class="fas fa-weight-hanging"></i>{{ $gramajeLimpio }}g
+                                        </span>
+                                    @endif
+                                    </span>
 
-        {{-- Boton de tachar: marca este producto como listo sin avanzar toda la comanda --}}
-        <button type="button"
-            class="btn-tachar shrink-0 w-8 h-8 rounded-xl border-2 transition-all flex items-center justify-center
-                   {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida'])
-                       ? 'bg-emerald-500 border-emerald-500 text-white scale-95'
-                       : 'border-zinc-300 dark:border-white/20 text-zinc-400 hover:border-emerald-500 hover:text-emerald-500 hover:scale-105' }}"
-            title="{{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'Desmarcar' : 'Marcar como listo' }}">
-            <i class="fas fa-check text-[11px]"></i>
-        </button>
-    </div>
-    @if($detalle->notas)
-        <span class="flex items-start gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-bold w-full break-words leading-snug">
-            <i class="fas fa-exclamation-circle mt-0.5 shrink-0"></i>
-            <span>{{ $detalle->notas }}</span>
-        </span>
-    @endif
-</li>
+                                    <button type="button"
+                                        class="btn-tachar shrink-0 w-8 h-8 rounded-xl border-2 transition-all flex items-center justify-center
+                                               {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida'])
+                                                    ? 'bg-emerald-500 border-emerald-500 text-white scale-95'
+                                                    : 'border-zinc-300 dark:border-white/20 text-zinc-400 hover:border-emerald-500 hover:text-emerald-500 hover:scale-105' }}"
+                                        title="{{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'Desmarcar' : 'Marcar como listo' }}">
+                                        <i class="fas fa-check text-[11px]"></i>
+                                    </button>
+                                </div>
+                                @if($detalle->notas)
+                                    <div class="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-bold w-full mt-1 transition-opacity duration-300
+                                        {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'opacity-40' : 'opacity-100' }}">
+                                        <ul class="list-none space-y-0.5">
+                                            @foreach(explode("\n", str_replace(' | ', "\n", $detalle->notas)) as $linea)
+                                                @if(!empty(trim($linea)))
+                                                    <li class="flex items-start gap-2 leading-tight">
+                                                        <i class="fas fa-chevron-right mt-0.5 text-[8px] opacity-70"></i>
+                                                        <span>{{ trim($linea) }}</span>
+                                                    </li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 </div>
 
-                {{-- Formulario con ÚNICO Botón para finalizar la comanda --}}
                 <div class="p-3 sm:p-4 bg-[var(--bg-color)] border-t border-[var(--border-color)]">
                     <form action="{{ route('admin.cocina.orden.estado', $comanda->orden_id) }}" method="POST" class="form-avanzar-estado">
                         @csrf @method('PATCH')

@@ -103,9 +103,20 @@
                                 <p class="text-zinc-900 dark:text-white font-bold text-[13px] leading-tight truncate">{{ $detalle->producto->nombre ?? 'Producto sin nombre' }}</p>
                                 <p class="text-[9px] text-zinc-500 dark:text-zinc-400 font-semibold leading-tight">Unit: ${{ number_format($detalle->precio_unitario, 2) }}</p>
 
-                                @if($detalle->notas)
-                                    <p class="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase italic truncate leading-tight">{{ $detalle->notas }}</p>
-                                @endif
+    @if($detalle->notas)
+    <div class="mt-1 p-1.5 rounded-lg bg-zinc-500/10 border border-zinc-500/20 text-zinc-600 dark:text-zinc-400 text-[10px] w-full">
+        <ul class="list-none space-y-0.5">
+            @foreach(explode("\n", str_replace(' | ', "\n", $detalle->notas)) as $linea)
+                @if(!empty(trim($linea)))
+                    <li class="flex items-start gap-1.5 leading-tight">
+                        <i class="fas fa-chevron-right mt-0.5 text-[6px] opacity-60 shrink-0 text-zinc-400"></i>
+                        <span class="font-medium">{{ trim($linea) }}</span>
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+    </div>
+@endif
 
                                 @if($detalle->promocionAplicada)
                                     <p class="text-[9px] text-emerald-600 dark:text-emerald-400 font-black uppercase flex items-center gap-1 leading-tight">
